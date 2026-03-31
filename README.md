@@ -1,306 +1,259 @@
 
 
 
-
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Global Ban Appeal</title>
+  <meta charset="UTF-8" />
+  <title>Appeal Review</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #0f172a;
-      color: #e5e7eb;
+      margin: 0;
+      background: #0f0f12;
+      font-family: "Inter", sans-serif;
+      color: #e5e5e5;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      margin: 0;
+      padding: 20px;
     }
-    .container {
-      background: rgba(15, 23, 42, 0.9);
-      border-radius: 16px;
-      padding: 24px 28px;
-      max-width: 500px;
+
+    .card {
       width: 100%;
-      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.6);
-      border: 1px solid rgba(148, 163, 184, 0.4);
+      max-width: 650px;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 18px;
+      padding: 28px;
       backdrop-filter: blur(18px);
+      box-shadow: 0 0 40px rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.08);
     }
+
     h1 {
-      margin-top: 0;
-      font-size: 1.4rem;
-      text-align: center;
-      color: #f9fafb;
+      margin: 0 0 10px 0;
+      font-size: 1.7rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
     }
-    label {
-      display: block;
-      margin-top: 12px;
+
+    .desc {
       font-size: 0.9rem;
-      color: #cbd5f5;
+      opacity: 0.7;
+      margin-bottom: 22px;
     }
+
+    label {
+      font-size: 0.85rem;
+      opacity: 0.85;
+      margin-bottom: 6px;
+      display: block;
+    }
+
     input, textarea {
       width: 100%;
-      margin-top: 6px;
-      padding: 8px 10px;
+      padding: 10px 12px;
       border-radius: 10px;
-      border: 1px solid rgba(148, 163, 184, 0.6);
-      background: rgba(15, 23, 42, 0.8);
-      color: #e5e7eb;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color: #fff;
       font-size: 0.9rem;
       outline: none;
+      transition: 0.15s;
     }
+
+    input:focus, textarea:focus {
+      border-color: #6366f1;
+      background: rgba(255,255,255,0.12);
+    }
+
     textarea {
+      min-height: 90px;
       resize: vertical;
-      min-height: 80px;
     }
-    button {
-      margin-top: 18px;
+
+    .btn {
+      margin-top: 20px;
       width: 100%;
-      padding: 10px 0;
-      border-radius: 999px;
+      padding: 12px;
+      border-radius: 10px;
       border: none;
-      background: linear-gradient(135deg, #38bdf8, #6366f1);
-      color: #f9fafb;
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      color: white;
+      font-size: 1rem;
       font-weight: 600;
-      font-size: 0.95rem;
       cursor: pointer;
+      transition: 0.15s;
     }
-    .message {
-      margin-top: 14px;
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(99,102,241,0.4);
+    }
+
+    .status {
+      margin-top: 16px;
+      font-size: 0.85rem;
+      opacity: 0.8;
+    }
+
+    .score {
+      margin-top: 10px;
       font-size: 0.9rem;
-      text-align: center;
+      font-weight: 600;
     }
-    .success { color: #4ade80; }
-    .error { color: #f97373; }
+
+    .accepted {
+      color: #4ade80;
+    }
+
+    .declined {
+      color: #f87171;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Global Ban Appeal</h1>
+
+  <div class="card">
+    <h1>Ban Appeal</h1>
+    <div class="desc">Your appeal will be automatically reviewed and scored by the system.</div>
+
     <form id="appealForm">
-      <label for="discordUser">Discord User:</label>
-      <input type="text" id="discordUser" required>
+      <label>Discord Username</label>
+      <input id="username" required />
 
-      <label for="discordId">Discord ID:</label>
-      <input type="text" id="discordId" required>
+      <label style="margin-top: 14px;">Discord ID</label>
+      <input id="userId" required />
 
-      <label for="reasonBan">Reason for Global Ban:</label>
-      <textarea id="reasonBan" required></textarea>
+      <label style="margin-top: 14px;">Reason you were banned</label>
+      <textarea id="banReason" required></textarea>
 
-      <label for="doDifferently">What are you going to do differently?</label>
-      <textarea id="doDifferently" required></textarea>
+      <label style="margin-top: 14px;">What you did wrong</label>
+      <textarea id="whatWrong" required></textarea>
 
-      <button type="submit">Submit Appeal</button>
-      <div id="responseMessage" class="message"></div>
+      <label style="margin-top: 14px;">What you will do differently</label>
+      <textarea id="whatDifferent" required></textarea>
+
+      <label style="margin-top: 14px;">Why you believe your appeal should be accepted</label>
+      <textarea id="whyAccept" required></textarea>
+
+      <label style="margin-top: 14px;">Why staff might decline your appeal</label>
+      <textarea id="whyDecline" required></textarea>
+
+      <button class="btn" type="submit">Submit Appeal</button>
+
+      <div id="scoreDisplay" class="score"></div>
+      <div id="statusMessage" class="status"></div>
     </form>
   </div>
 
   <script>
-    const webhookUrl = "https://discord.com/api/webhooks/1487941701489262672/K1KkkDeWYR38ubxGI9wOwBBHy-ZsuVCShvgcdIF9-445CglPqJJmwLkYsYcuHaNOKzoP";
+    const WEBHOOK_URL = "https://discord.com/api/webhooks/1487941701489262672/K1KkkDeWYR38ubxGI9wOwBBHy-ZsuVCShvgcdIF9-445CglPqJJmwLkYsYcuHaNOKzoP";
 
-    // NEW: Severe ban keywords
-    const severeKeywords = [
-      "dox", "doxxing", "doxing",
-      "threat", "death threat",
-      "raid", "raiding",
-      "child", "minor", "cp",
-      "gore", "nsfw", "sexual",
-      "terror", "terroristic",
-      "malware", "hacking", "hack",
-      "ip grabber", "token grabber"
-    ];
+    function scoreAppeal(banReason, whatWrong, whatDifferent) {
+      let score = 0;
+      const clean = s => (s || "").trim();
+      banReason = clean(banReason);
+      whatWrong = clean(whatWrong);
+      whatDifferent = clean(whatDifferent);
 
-    function evaluateAppeal(reason, improvement) {
-      let accountability = 0;
-      let maturity = 0;
-      let honesty = 0;
-      let risk = 15;
-      const flags = [];
+      const totalLength = banReason.length + whatWrong.length + whatDifferent.length;
 
-      // SEVERE BAN CHECK
-      let severe = false;
-      severeKeywords.forEach(k => {
-        if (reason.toLowerCase().includes(k)) severe = true;
+      if (totalLength > 150) score += 8;
+      if (totalLength > 350) score += 8;
+      if (totalLength > 700) score += 9;
+
+      const lower = (banReason + whatWrong + whatDifferent).toLowerCase();
+      const admits = ["i did", "my fault", "i was wrong", "i take responsibility", "i admit"];
+      const blames = ["not my fault", "false ban", "admin fault", "staff fault"];
+
+      admits.forEach(k => { if (lower.includes(k)) score += 5; });
+      blames.forEach(k => { if (lower.includes(k)) score -= 6; });
+
+      if (whatWrong.length > 80) score += 8;
+      if (whatWrong.length > 200) score += 6;
+
+      const futureWords = ["i will", "i won't", "in the future", "next time", "from now on"];
+      futureWords.forEach(k => { if (whatDifferent.toLowerCase().includes(k)) score += 4; });
+
+      if (whatDifferent.length > 80) score += 6;
+      if (whatDifferent.length > 200) score += 6;
+
+      let tone = 5;
+      const badTone = ["fuck", "idiot", "kys", "trash staff"];
+      badTone.forEach(k => { if (lower.includes(k)) tone -= 3; });
+
+      const polite = ["please", "thank you", "sorry"];
+      polite.forEach(k => { if (lower.includes(k)) tone += 2; });
+
+      score += Math.max(0, Math.min(10, tone));
+
+      return Math.max(1, Math.min(100, Math.round(score)));
+    }
+
+    async function sendToWebhook(payload) {
+      return await fetch(WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
       });
-
-      const denialKeywords = [
-        "not my fault", "false", "unfair", "didn't do anything",
-        "idk", "dont know", "don't know", "false ban"
-      ];
-
-      const apologyKeywords = [
-        "sorry", "apologize", "apology", "my fault", "i regret",
-        "take responsibility", "responsibility", "i understand",
-        "fully understand", "i take full responsibility"
-      ];
-
-      const improvementKeywords = [
-        "respect", "respect members", "respect staff",
-        "won't happen again", "improve", "change", "changed",
-        "differently", "better", "second chance", "2nd chance"
-      ];
-
-      if (improvement.length > 120) accountability += 10;
-      if (improvement.length > 200) accountability += 10;
-      if (improvement.length < 50) {
-        accountability -= 10;
-        flags.push("⚠️ Very short improvement explanation");
-      }
-
-      apologyKeywords.forEach(k => {
-        if (improvement.toLowerCase().includes(k)) {
-          accountability += 6;
-          honesty += 6;
-        }
-      });
-
-      improvementKeywords.forEach(k => {
-        if (improvement.toLowerCase().includes(k)) maturity += 6;
-      });
-
-      denialKeywords.forEach(k => {
-        if (reason.toLowerCase().includes(k)) {
-          accountability -= 10;
-          honesty -= 10;
-          flags.push("🚫 Denial of wrongdoing detected");
-        }
-      });
-
-      if (reason.length < 40) {
-        maturity -= 5;
-        flags.push("⚠️ Very short ban reason explanation");
-      }
-
-      if (reason.toLowerCase().includes("troll")) {
-        risk += 15;
-        flags.push("🚨 Possible troll behavior");
-      }
-
-      accountability = Math.max(0, Math.min(25, accountability));
-      maturity = Math.max(0, Math.min(25, maturity + 10));
-      honesty = Math.max(0, Math.min(25, honesty));
-      risk = Math.max(0, Math.min(25, risk));
-
-      const total = accountability + maturity + honesty + (25 - risk);
-
-      let confidence =
-        (accountability * 1.4) +
-        (honesty * 1.6) +
-        (maturity * 1.2) -
-        (risk * 1.3);
-
-      confidence = Math.max(0, Math.min(100, Math.round(confidence)));
-
-      let recommendation = "DECLINE";
-      let evaluationReason = "User shows insufficient accountability or maturity.";
-
-      if (total >= 65 && confidence >= 55) {
-        recommendation = "ACCEPT";
-        evaluationReason = "User demonstrates strong accountability and improvement.";
-      }
-
-      // HARD OVERRIDE FOR SEVERE BANS
-      if (severe) {
-        recommendation = "DO NOT ACCEPT";
-        evaluationReason = "⚫ **DO NOT ACCEPT THIS APPEAL FOR SECURITY REASONS**";
-        flags.push("⛔ Severe ban reason detected");
-      }
-
-      return {
-        accountability,
-        maturity,
-        honesty,
-        risk,
-        total,
-        confidence,
-        recommendation,
-        evaluationReason,
-        flags,
-        severe
-      };
     }
 
     document.getElementById("appealForm").addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const discordUser = document.getElementById("discordUser").value.trim();
-      const discordId = document.getElementById("discordId").value.trim();
-      const reasonBan = document.getElementById("reasonBan").value.trim();
-      const doDifferently = document.getElementById("doDifferently").value.trim();
-      const responseMessage = document.getElementById("responseMessage");
+      const username = document.getElementById("username").value.trim();
+      const userId = document.getElementById("userId").value.trim();
+      const banReason = document.getElementById("banReason").value.trim();
+      const whatWrong = document.getElementById("whatWrong").value.trim();
+      const whatDifferent = document.getElementById("whatDifferent").value.trim();
+      const whyAccept = document.getElementById("whyAccept").value.trim();
+      const whyDecline = document.getElementById("whyDecline").value.trim();
 
-      const evalResult = evaluateAppeal(reasonBan, doDifferently);
+      const score = scoreAppeal(banReason, whatWrong, whatDifferent);
+      const accepted = score >= 75;
+      const decision = accepted ? "Accepted" : "Declined";
 
-      const flagsText = evalResult.flags.length > 0 ? evalResult.flags.join("\n• ") : "None detected";
+      document.getElementById("scoreDisplay").innerHTML =
+        `Score: ${score}/100 — <span class="${accepted ? "accepted" : "declined"}">${decision}</span>`;
 
       const payload = {
-        content: "<@&1487941139649790063> New global ban appeal submitted.",
+        username: "Appeal System",
         embeds: [
           {
-            title: "📌 Global Ban Appeal Submitted",
-            color: evalResult.severe ? 0x000000 : (evalResult.recommendation === "ACCEPT" ? 0x2ecc71 : 0xe74c3c),
+            title: "Ban Appeal Submission",
+            color: accepted ? 0x22c55e : 0xef4444,
             fields: [
-              {
-                name: "👤 User Information",
-                value: `• **Username:** ${discordUser}\n• **Discord ID:** ${discordId}`
-              },
-              {
-                name: "📘 Reason for Ban",
-                value: reasonBan
-              },
-              {
-                name: "🛠 What They Will Do Differently",
-                value: doDifferently
-              },
-              {
-                name: "📊 System Evaluation",
-                value:
-                  `• **Accountability:** ${evalResult.accountability}/25\n` +
-                  `• **Maturity:** ${evalResult.maturity}/25\n` +
-                  `• **Honesty:** ${evalResult.honesty}/25\n` +
-                  `• **Risk Score:** ${evalResult.risk}/25\n` +
-                  `• **Overall Appeal Score:** ${evalResult.total}/100`
-              },
-              {
-                name: "🔍 Genuine Appeal Confidence",
-                value: `${evalResult.confidence}%`
-              },
-              {
-                name: "🧩 Flags Detected",
-                value: `• ${flagsText}`
-              },
-              {
-                name: "🧠 System Recommendation",
-                value: evalResult.evaluationReason
-              }
+              { name: "Discord Username", value: username },
+              { name: "Discord ID", value: userId },
+              { name: "Ban Reason", value: banReason },
+              { name: "What They Did Wrong", value: whatWrong },
+              { name: "What They'll Do Differently", value: whatDifferent },
+              { name: "Why They Want Acceptance", value: whyAccept },
+              { name: "Why It Might Be Declined", value: whyDecline },
+              { name: "Score", value: `${score}/100` },
+              { name: "Decision", value: decision }
             ],
             timestamp: new Date().toISOString()
           }
         ]
       };
 
-      try {
-        const res = await fetch(webhookUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
+      document.getElementById("statusMessage").textContent = "Submitting appeal…";
 
+      try {
+        const res = await sendToWebhook(payload);
         if (res.ok) {
-          responseMessage.textContent =
-            "Thank you for submitting an appeal. You will get a response shortly from one of our staff members. Please make sure to keep your DMs open!";
-          responseMessage.classList.add("success");
-          e.target.reset();
+          document.getElementById("statusMessage").textContent = "Appeal submitted successfully.";
         } else {
-          responseMessage.textContent = "There was an error submitting your appeal.";
-          responseMessage.classList.add("error");
+          document.getElementById("statusMessage").textContent =
+            "Webhook blocked by browser. Use a backend proxy.";
         }
       } catch {
-        responseMessage.textContent = "There was an error submitting your appeal.";
-        responseMessage.classList.add("error");
+        document.getElementById("statusMessage").textContent =
+          "Unable to send (likely CORS). Use a backend proxy.";
       }
     });
   </script>
+
 </body>
 </html>
