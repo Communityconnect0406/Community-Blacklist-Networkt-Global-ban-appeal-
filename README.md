@@ -1,6 +1,10 @@
 
 
 
+
+
+
+
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -149,43 +153,63 @@
   <script>
     const WEBHOOK_URL = "https://discord.com/api/webhooks/1487941701489262672/K1KkkDeWYR38ubxGI9wOwBBHy-ZsuVCShvgcdIF9-445CglPqJJmwLkYsYcuHaNOKzoP";
 
-    function scoreAppeal(banReason, whatWrong, whatDifferent) {
+    // NEW FAIR SCORING ENGINE
+    function scoreAppeal(banReason, whatWrong, whatDifferent, whyAccept, whyDecline) {
       let score = 0;
+
       const clean = s => (s || "").trim();
-      banReason = clean(banReason);
-      whatWrong = clean(whatWrong);
-      whatDifferent = clean(whatDifferent);
+      const all = (
+        clean(banReason) + " " +
+        clean(whatWrong) + " " +
+        clean(whatDifferent) + " " +
+        clean(whyAccept) + " " +
+        clean(whyDecline)
+      ).toLowerCase();
 
-      const totalLength = banReason.length + whatWrong.length + whatDifferent.length;
+      // 1. Apology & accountability (0–35)
+      const apologyWords = ["sorry", "apologize", "apologise", "i regret", "i'm sorry"];
+      const accountabilityWords = ["i take responsibility", "my fault", "i was wrong", "i admit"];
 
-      if (totalLength > 150) score += 8;
-      if (totalLength > 350) score += 8;
-      if (totalLength > 700) score += 9;
+      apologyWords.forEach(w => { if (all.includes(w)) score += 6; });
+      accountabilityWords.forEach(w => { if (all.includes(w)) score += 7; });
 
-      const lower = (banReason + whatWrong + whatDifferent).toLowerCase();
-      const admits = ["i did", "my fault", "i was wrong", "i take responsibility", "i admit"];
-      const blames = ["not my fault", "false ban", "admin fault", "staff fault"];
+      score = Math.min(score, 35);
 
-      admits.forEach(k => { if (lower.includes(k)) score += 5; });
-      blames.forEach(k => { if (lower.includes(k)) score -= 6; });
+      // 2. Explanation quality (0–25)
+      const explanationLength =
+        banReason.length + whatWrong.length + whatDifferent.length;
 
-      if (whatWrong.length > 80) score += 8;
-      if (whatWrong.length > 200) score += 6;
+      if (explanationLength > 80) score += 8;
+      if (explanationLength > 200) score += 8;
+      if (explanationLength > 350) score += 9;
 
-      const futureWords = ["i will", "i won't", "in the future", "next time", "from now on"];
-      futureWords.forEach(k => { if (whatDifferent.toLowerCase().includes(k)) score += 4; });
+      score = Math.min(score, 60);
 
-      if (whatDifferent.length > 80) score += 6;
-      if (whatDifferent.length > 200) score += 6;
+      // 3. Future improvement plan (0–20)
+      const futureWords = [
+        "i will", "i won't", "i will not",
+        "in the future", "next time", "from now on",
+        "i'll", "i plan to", "i promise"
+      ];
 
-      let tone = 5;
-      const badTone = ["fuck", "idiot", "kys", "trash staff"];
-      badTone.forEach(k => { if (lower.includes(k)) tone -= 3; });
+      futureWords.forEach(w => { if (all.includes(w)) score += 4; });
 
-      const polite = ["please", "thank you", "sorry"];
-      polite.forEach(k => { if (lower.includes(k)) tone += 2; });
+      if (whatDifferent.length > 100) score += 6;
 
-      score += Math.max(0, Math.min(10, tone));
+      score = Math.min(score, 80);
+
+      // 4. Tone & maturity (0–15)
+      const politeWords = ["please", "thank you", "thanks", "sincerely"];
+      politeWords.forEach(w => { if (all.includes(w)) score += 3; });
+
+      const toxicWords = ["fuck", "idiot", "kys", "trash", "clown"];
+      toxicWords.forEach(w => { if (all.includes(w)) score -= 5; });
+
+      score = Math.min(score, 95);
+
+      // 5. Self-awareness (0–5)
+      if (whyDecline.length > 40) score += 3;
+      if (whyDecline.includes("understand")) score += 2;
 
       return Math.max(1, Math.min(100, Math.round(score)));
     }
@@ -209,7 +233,7 @@
       const whyAccept = document.getElementById("whyAccept").value.trim();
       const whyDecline = document.getElementById("whyDecline").value.trim();
 
-      const score = scoreAppeal(banReason, whatWrong, whatDifferent);
+      const score = scoreAppeal(banReason, whatWrong, whatDifferent, whyAccept, whyDecline);
       const accepted = score >= 75;
       const decision = accepted ? "Accepted" : "Declined";
 
